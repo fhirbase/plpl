@@ -62,6 +62,7 @@ module.exports =
 
     if shouldRollback
       execute('ROLLBACK;')
+      throw new Error('FHIR transaction was rollbacked')
     else
       execute('COMMIT;')
 
