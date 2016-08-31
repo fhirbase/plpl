@@ -55,10 +55,12 @@ Module::_compile = (answer, filename) ->
       if Array.isArray(sig)
         returns = sig[(sig.length - 1)]
         args = zip(params, sig)
+        runnable = false
       else if sig.returns
         returns = sig.returns
         args = zip(params, sig.arguments)
         immutable = sig.immutable
+        runnable = sig.runnable
       else
         throw new Error('plv8_signature should be array or object')
 
@@ -67,7 +69,8 @@ Module::_compile = (answer, filename) ->
         returns: returns
         params: args
         filename: filename
-        immutable: immutable
+        immutable: immutable,
+        runnable: runnable
   res
 
 _isAbsolute = (pth)->
@@ -83,7 +86,7 @@ generate_fn = (mod, name, info)->
   else
     pass_params = ''
 
-  """
+  body = """
   ---
   DROP FUNCTION IF EXISTS #{declaration} CASCADE;
   CREATE OR REPLACE FUNCTION
@@ -94,6 +97,12 @@ generate_fn = (mod, name, info)->
   $JAVASCRIPT$ LANGUAGE plv8 #{immutable};
   ---
   """
+  if info.runnable
+      body = """
+      #{body}
+      SELECT #{name}();
+      """
+  body
 
 scan = (pth) ->
   unless _isAbsolute(pth)
