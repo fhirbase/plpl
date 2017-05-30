@@ -20,7 +20,7 @@ coerse = (x)->
     x
 
 execute = ->
-  client.querySync.applyPatch(client, arguments).map (x) ->
+  client.querySync.apply(client, arguments).map (x) ->
     obj = {}
     for k of x
       if x[k] && typeof x[k] == 'object'
